@@ -26,12 +26,47 @@ include(cmake/CPM.cmake)
 # PackageProject.cmake will be used to make our target installable
 CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.8.0")
 
-CPMAddPackage(
-  NAME fmt
-  GIT_TAG 9.1.0
-  GITHUB_REPOSITORY fmtlib/fmt
-  OPTIONS "FMT_INSTALL YES" # create an installable target
-)
+set(TRY_BOOST_VERSION "1.84.0")
+set(BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "thread")
+set(BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "asio")
+set(BOOST_SKIP_INSTALL_RULES OFF)
+
+set(IS_BOOST_LOCAL OFF)
+if(${CPM_LOCAL_PACKAGES_ONLY})
+  message(STATUS "Trying to find Boost...")
+  find_package(Boost ${TRY_BOOST_VERSION} REQUIRED COMPONENTS
+    ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED})
+  set(IS_BOOST_LOCAL ON)
+elseif(${CPM_USE_LOCAL_PACKAGES} OR NOT ${CPM_DOWNLOAD_ALL})
+  message(STATUS "Trying to use local Boost...")
+  find_package(Boost ${TRY_BOOST_VERSION} COMPONENTS ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED})
+  if(${BOOST_FOUND})
+    set(IS_BOOST_LOCAL ON)
+    message(DEBUG "boost include dir: ${Boost_INCLUDE_DIRS}")
+  endif()
+endif()
+
+if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
+  message(STATUS "Trying to download Boost...")
+  set(BOOST_INCLUDE_LIBRARIES
+    "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}")
+  CPMAddPackage(
+    NAME Boost
+    URL
+    "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
+  )
+  set(IS_BOOST_LOCAL OFF)
+
+endif()
+
+
+
+# CPMAddPackage(
+#   NAME fmt
+#   GIT_TAG 9.1.0
+#   GITHUB_REPOSITORY fmtlib/fmt
+#   OPTIONS "FMT_INSTALL YES" # create an installable target
+# )
 
 # ---- Add source files ----
 
@@ -51,7 +86,13 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+# target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+if(${IS_BOOST_LOCAL})
+  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
+else()
+  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::asio)
+endif()
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::thread)
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -74,5 +115,5 @@ packageProject(
   INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}"
   COMPATIBILITY SameMajorVersion
-  DEPENDENCIES "fmt 9.1.0"
+  DEPENDENCIES "Boost 1.84.0"
 )
