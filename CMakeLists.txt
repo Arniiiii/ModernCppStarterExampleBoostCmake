@@ -30,6 +30,9 @@ set(TRY_BOOST_VERSION "1.84.0")
 set(BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "thread")
 set(BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "asio")
 
+option(BUILD_SHARED_LIBS "yes/no" YES)
+
+
 set(IS_BOOST_LOCAL OFF)
 if(${CPM_LOCAL_PACKAGES_ONLY})
   message(STATUS "Trying to find Boost...")
@@ -57,7 +60,7 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
   )
   message(DEBUG "It's gonna execute next: patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_enable_install_rules_for_add_subdirectory_case.patch  ")
   execute_process(COMMAND patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_enable_install_rules_for_add_subdirectory_case.patch  ) # -N is essential. it won't allow patch twice.
-  add_subdirectory(${Boost_SOURCE_DIR})
+  add_subdirectory(${Boost_SOURCE_DIR} ${Boost_BINARY_DIR} SYSTEM EXCLUDE_FROM_ALL)
   set(IS_BOOST_LOCAL OFF)
 endif()
 
@@ -74,7 +77,8 @@ endif()
 
 # Note: globbing sources is considered bad practice as CMake's generators may not detect new files
 # automatically. Keep that in mind when changing files, or explicitly mention them here.
-file(GLOB_RECURSE headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h")
+file(GLOB_RECURSE headers CONFIGURE_DEPENDS
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
 # ---- Create library ----
