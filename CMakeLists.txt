@@ -32,16 +32,19 @@ set(BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "asio")
 
 option(BUILD_SHARED_LIBS "yes/no" YES)
 
-
 set(IS_BOOST_LOCAL OFF)
 if(${CPM_LOCAL_PACKAGES_ONLY})
   message(STATUS "Trying to find Boost...")
-  find_package(Boost ${TRY_BOOST_VERSION} REQUIRED COMPONENTS
-    ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED})
+  find_package(
+    Boost ${TRY_BOOST_VERSION} REQUIRED
+    COMPONENTS ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}
+  )
   set(IS_BOOST_LOCAL ON)
 elseif(${CPM_USE_LOCAL_PACKAGES} OR NOT ${CPM_DOWNLOAD_ALL})
   message(STATUS "Trying to use local Boost...")
-  find_package(Boost ${TRY_BOOST_VERSION} COMPONENTS ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED})
+  find_package(
+    Boost ${TRY_BOOST_VERSION} COMPONENTS ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}
+  )
   if(${BOOST_FOUND})
     set(IS_BOOST_LOCAL ON)
     message(DEBUG "boost include dir: ${Boost_INCLUDE_DIRS}")
@@ -51,34 +54,38 @@ endif()
 if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
   message(STATUS "Trying to download Boost...")
   set(BOOST_INCLUDE_LIBRARIES
-    "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}")
+      "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}"
+  )
+  set(__boost_include_libraries "")
   CPMAddPackage(
     NAME Boost
-    URL
-    "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
+    URL "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
     DOWNLOAD_ONLY YES
+    OPTIONS "BOOST_ENABLE_CMAKE ON"
   )
-  message(DEBUG "It's gonna execute next: patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_enable_install_rules_for_add_subdirectory_case.patch  ")
-  execute_process(COMMAND patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_enable_install_rules_for_add_subdirectory_case.patch  ) # -N is essential. it won't allow patch twice.
+  file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
+       "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/*.patch"
+  )
+  foreach(patch_filename IN LISTS patches_for_boost)
+    message(DEBUG
+            "It's gonna execute next: patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${patch_filename} "
+    )
+    execute_process(
+      COMMAND patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${patch_filename}
+    ) # -N is essential. it won't allow patch twice.
+  endforeach()
   add_subdirectory(${Boost_SOURCE_DIR} ${Boost_BINARY_DIR} SYSTEM EXCLUDE_FROM_ALL)
   set(IS_BOOST_LOCAL OFF)
 endif()
 
-
-
-# CPMAddPackage(
-#   NAME fmt
-#   GIT_TAG 9.1.0
-#   GITHUB_REPOSITORY fmtlib/fmt
-#   OPTIONS "FMT_INSTALL YES" # create an installable target
-# )
+# CPMAddPackage( NAME fmt GIT_TAG 9.1.0 GITHUB_REPOSITORY fmtlib/fmt OPTIONS "FMT_INSTALL YES" #
+# create an installable target )
 
 # ---- Add source files ----
 
 # Note: globbing sources is considered bad practice as CMake's generators may not detect new files
 # automatically. Keep that in mind when changing files, or explicitly mention them here.
-file(GLOB_RECURSE headers CONFIGURE_DEPENDS
-  "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
+file(GLOB_RECURSE headers CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp")
 
 # ---- Create library ----
@@ -91,8 +98,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 # being a cross-platform target, we enforce standards conformance on MSVC
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
-# Link dependencies
-# target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
+# Link dependencies target_link_libraries(${PROJECT_NAME} PRIVATE fmt::fmt)
 if(${IS_BOOST_LOCAL})
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 else()
@@ -121,5 +127,25 @@ packageProject(
   INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}"
   COMPATIBILITY SameMajorVersion
-  DEPENDENCIES "Boost 1.84.0"
+  DEPENDENCIES "Boost 1.84.0" # "boost_asio" "boost_thread"
+)
+
+message("Boost include libraries: ${__boost_include_libraries}")
+set(__${PROJECT_NAME}__boost_dependencies "")
+foreach(a_lib_with_maybe_slash ${__boost_include_libraries})
+  set(a_lib ${a_lib_with_maybe_slash})
+  string(REPLACE "/" "_" a_lib ${a_lib})
+  message("boost lib: boost_"${a_lib})
+  list(APPEND __${PROJECT_NAME}__boost_dependencies "boost_${a_lib}")
+endforeach()
+
+message("Boost libs with boost__ : ${__${PROJECT_NAME}__boost_dependencies}")
+
+install(
+  TARGETS ${target_name} ${__${PROJECT_NAME}__boost_dependencies}
+  RUNTIME DESTINATION bin # Destination for executables
+  LIBRARY DESTINATION lib64 # Destination for shared libraries
+  ARCHIVE DESTINATION lib64 # Destination for static libraries (if any)
+  PRIVATE_HEADER DESTINATION include
+  PUBLIC_HEADER DESTINATION include
 )
