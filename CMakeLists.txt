@@ -57,24 +57,30 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
       "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}"
   )
   set(__boost_include_libraries "")
+
+  find_package(Patch REQUIRED)
+
+  # set(PATCH_COMMAND_ARGS " -rnN ")
+  set(PATCH_COMMAND_ARGS "")
+  # set(PATCH_COMMAND_SOURCE " -d " )
+  # set(PATCH_COMMAND_INPUT_PATCHES " -i ")
+  # file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
+  #      "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/*.patch"
+  # )
+  # set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE} ${PATCH_COMMAND_ARGS} < ")
+  # set(PATCH_COMMAND_FOR_CPM "")
+  # foreach(patch_filename IN LISTS patches_for_boost)
+  #     string(APPEND PATCH_COMMAND_FOR_CPM "${PATCH_COMMAND_FOR_CPM_BASE}
+  #     ${patch_filename} \n")
+  # endforeach()
+  # message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
   CPMAddPackage(
     NAME Boost
     URL "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
-    DOWNLOAD_ONLY YES
-    OPTIONS "BOOST_ENABLE_CMAKE ON"
+    OPTIONS "BOOST_ENABLE_CMAKE ON" 
+    PATCH_COMMAND "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_enable_install_rules_for_add_subdirectory_case.patch"
+"${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_give_all_boost_deps_please.patch"
   )
-  file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
-       "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/*.patch"
-  )
-  foreach(patch_filename IN LISTS patches_for_boost)
-    message(DEBUG
-            "It's gonna execute next: patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${patch_filename} "
-    )
-    execute_process(
-      COMMAND patch -rnN -p1 -d ${Boost_SOURCE_DIR} -i ${patch_filename}
-    ) # -N is essential. it won't allow patch twice.
-  endforeach()
-  add_subdirectory(${Boost_SOURCE_DIR} ${Boost_BINARY_DIR} SYSTEM EXCLUDE_FROM_ALL)
   set(IS_BOOST_LOCAL OFF)
 endif()
 
@@ -129,23 +135,16 @@ packageProject(
   COMPATIBILITY SameMajorVersion
   DEPENDENCIES "Boost 1.84.0" # "boost_asio" "boost_thread"
 )
-
-message("Boost include libraries: ${__boost_include_libraries}")
-set(__${PROJECT_NAME}__boost_dependencies "")
-foreach(a_lib_with_maybe_slash ${__boost_include_libraries})
-  set(a_lib ${a_lib_with_maybe_slash})
-  string(REPLACE "/" "_" a_lib ${a_lib})
-  message("boost lib: boost_"${a_lib})
-  list(APPEND __${PROJECT_NAME}__boost_dependencies "boost_${a_lib}")
-endforeach()
-
-message("Boost libs with boost__ : ${__${PROJECT_NAME}__boost_dependencies}")
-
-install(
-  TARGETS ${target_name} ${__${PROJECT_NAME}__boost_dependencies}
-  RUNTIME DESTINATION bin # Destination for executables
-  LIBRARY DESTINATION lib64 # Destination for shared libraries
-  ARCHIVE DESTINATION lib64 # Destination for static libraries (if any)
-  PRIVATE_HEADER DESTINATION include
-  PUBLIC_HEADER DESTINATION include
-)
+#
+# message("Boost include libraries: ${__boost_include_libraries}")
+# set(__${PROJECT_NAME}__boost_dependencies "") foreach(a_lib_with_maybe_slash
+# ${__boost_include_libraries}) set(a_lib ${a_lib_with_maybe_slash}) string(REPLACE "/" "_" a_lib
+# ${a_lib}) message("boost lib: boost_"${a_lib}) list(APPEND __${PROJECT_NAME}__boost_dependencies
+# "boost_${a_lib}") endforeach()
+#
+# message("Boost libs with boost__ : ${__${PROJECT_NAME}__boost_dependencies}")
+#
+# install( TARGETS ${target_name} ${__${PROJECT_NAME}__boost_dependencies} RUNTIME DESTINATION bin #
+# Destination for executables LIBRARY DESTINATION lib64 # Destination for shared libraries ARCHIVE
+# DESTINATION lib64 # Destination for static libraries (if any) PRIVATE_HEADER DESTINATION include
+# PUBLIC_HEADER DESTINATION include )
