@@ -46,7 +46,8 @@ message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
 CPMAddPackage(
   NAME PackageProject
   VERSION 1.11.2
-  GIT_REPOSITORY "https://github.com/TheLartians/PackageProject.cmake.git" PATCH_COMMAND ${PATCH_COMMAND_FOR_CPM}
+  GIT_REPOSITORY "https://github.com/TheLartians/PackageProject.cmake.git" PATCH_COMMAND
+                                                                           ${PATCH_COMMAND_FOR_CPM}
 )
 
 set(TRY_BOOST_VERSION "1.84.0")
@@ -133,9 +134,14 @@ target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>
 if(${IS_BOOST_LOCAL})
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 else()
-  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::asio)
+  foreach(a_lib ${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED})
+    target_link_libraries(${PROJECT_NAME} PUBLIC Boost::${a_lib})
+  endforeach()
 endif()
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::thread)
+
+foreach(a_lib ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED})
+  target_link_libraries(${PROJECT_NAME} PUBLIC Boost::${a_lib})
+endforeach()
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
