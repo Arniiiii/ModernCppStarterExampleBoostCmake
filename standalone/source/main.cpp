@@ -1,4 +1,4 @@
-#include "example_my_example.hpp"
+#include "greeter/example_my_example.hpp"
 #include <iostream>
 
 int main(int argc, char* argv[])

@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.14...3.22)
 # Note: update this to your new project's name and version
 project(
   Greeter
-  VERSION 1.0
+  VERSION 1.1
   LANGUAGES CXX
 )
 
@@ -24,7 +24,30 @@ endif()
 include(cmake/CPM.cmake)
 
 # PackageProject.cmake will be used to make our target installable
-CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.8.0")
+find_package(Patch REQUIRED)
+
+set(PATCH_COMMAND_ARGS "-rnN")
+
+file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/patches/packageProject/*.patch"
+)
+
+set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
+
+set(PATCH_COMMAND_FOR_CPM "")
+foreach(patch_filename IN LISTS patches_for_boost)
+  list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
+  list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
+  list(APPEND PATCH_COMMAND_FOR_CPM &&)
+endforeach()
+list(POP_BACK PATCH_COMMAND_FOR_CPM)
+
+message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
+CPMAddPackage(
+  NAME PackageProject
+  VERSION 1.11.2
+  GIT_REPOSITORY "https://github.com/TheLartians/PackageProject.cmake.git" PATCH_COMMAND ${PATCH_COMMAND_FOR_CPM}
+)
 
 set(TRY_BOOST_VERSION "1.84.0")
 set(BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "thread")
@@ -53,7 +76,7 @@ endif()
 
 if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
   message(STATUS "Trying to download Boost...")
-  
+
   set(BOOST_INCLUDE_LIBRARIES
       "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}"
   )
@@ -68,7 +91,7 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
   )
 
   set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
-  
+
   set(PATCH_COMMAND_FOR_CPM "")
   foreach(patch_filename IN LISTS patches_for_boost)
     list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
@@ -76,21 +99,18 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
     list(APPEND PATCH_COMMAND_FOR_CPM &&)
   endforeach()
   list(POP_BACK PATCH_COMMAND_FOR_CPM)
-  
+
   message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
-  
+
   CPMAddPackage(
     NAME Boost
     URL "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
         PATCH_COMMAND ${PATCH_COMMAND_FOR_CPM}
     OPTIONS "BOOST_ENABLE_CMAKE ON"
   )
-  
+
   set(IS_BOOST_LOCAL OFF)
 endif()
-
-# CPMAddPackage( NAME fmt GIT_TAG 9.1.0 GITHUB_REPOSITORY fmtlib/fmt OPTIONS "FMT_INSTALL YES" #
-# create an installable target )
 
 # ---- Add source files ----
 
@@ -129,27 +149,17 @@ target_include_directories(
 # header paths
 string(TOLOWER ${PROJECT_NAME}/version.h VERSION_HEADER_LOCATION)
 
+set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${PROJECT_VERSION})
+set_property(TARGET ${PROJECT_NAME} PROPERTY SOVERSION 1)
+
 packageProject(
   NAME ${PROJECT_NAME}
   VERSION ${PROJECT_VERSION}
   NAMESPACE ${PROJECT_NAME}
   BINARY_DIR ${PROJECT_BINARY_DIR}
   INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include
-  INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
+  INCLUDE_DESTINATION include/${PROJECT_NAME}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}"
-  COMPATIBILITY SameMajorVersion
-  DEPENDENCIES "Boost 1.84.0" # "boost_asio" "boost_thread"
+  COMPATIBILITY "AnyNewerVersion" DISABLE_VERSION_SUFFIX ON
+  DEPENDENCIES "Boost 1.84.0"
 )
-#
-# message("Boost include libraries: ${__boost_include_libraries}")
-# set(__${PROJECT_NAME}__boost_dependencies "") foreach(a_lib_with_maybe_slash
-# ${__boost_include_libraries}) set(a_lib ${a_lib_with_maybe_slash}) string(REPLACE "/" "_" a_lib
-# ${a_lib}) message("boost lib: boost_"${a_lib}) list(APPEND __${PROJECT_NAME}__boost_dependencies
-# "boost_${a_lib}") endforeach()
-#
-# message("Boost libs with boost__ : ${__${PROJECT_NAME}__boost_dependencies}")
-#
-# install( TARGETS ${target_name} ${__${PROJECT_NAME}__boost_dependencies} RUNTIME DESTINATION bin #
-# Destination for executables LIBRARY DESTINATION lib64 # Destination for shared libraries ARCHIVE
-# DESTINATION lib64 # Destination for static libraries (if any) PRIVATE_HEADER DESTINATION include
-# PUBLIC_HEADER DESTINATION include )

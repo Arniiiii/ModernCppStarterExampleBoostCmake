@@ -54,7 +54,8 @@ RUN echo "really installing"
 RUN cmake --install ./build
 
 RUN echo "what's with linking?"
-RUN lddtree /usr/local/lib64/Greeter-1.0/libGreeter.so
+RUN ls -lahR /usr/local/lib64  
+RUN lddtree /usr/local/lib64/libGreeter.so
 RUN lddtree /usr/local/bin/Greeter
 
 # CMD ./build/Backend
