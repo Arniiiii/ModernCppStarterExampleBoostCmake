@@ -53,6 +53,7 @@ endif()
 
 if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
   message(STATUS "Trying to download Boost...")
+  
   set(BOOST_INCLUDE_LIBRARIES
       "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}"
   )
@@ -60,27 +61,31 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
 
   find_package(Patch REQUIRED)
 
-  # set(PATCH_COMMAND_ARGS " -rnN ")
-  set(PATCH_COMMAND_ARGS "")
-  # set(PATCH_COMMAND_SOURCE " -d " )
-  # set(PATCH_COMMAND_INPUT_PATCHES " -i ")
-  # file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
-  #      "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/*.patch"
-  # )
-  # set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE} ${PATCH_COMMAND_ARGS} < ")
-  # set(PATCH_COMMAND_FOR_CPM "")
-  # foreach(patch_filename IN LISTS patches_for_boost)
-  #     string(APPEND PATCH_COMMAND_FOR_CPM "${PATCH_COMMAND_FOR_CPM_BASE}
-  #     ${patch_filename} \n")
-  # endforeach()
-  # message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
+  set(PATCH_COMMAND_ARGS "-rnN")
+
+  file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
+       "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/*.patch"
+  )
+
+  set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
+  
+  set(PATCH_COMMAND_FOR_CPM "")
+  foreach(patch_filename IN LISTS patches_for_boost)
+    list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
+    list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
+    list(APPEND PATCH_COMMAND_FOR_CPM &&)
+  endforeach()
+  list(POP_BACK PATCH_COMMAND_FOR_CPM)
+  
+  message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
+  
   CPMAddPackage(
     NAME Boost
     URL "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
-    OPTIONS "BOOST_ENABLE_CMAKE ON" 
-    PATCH_COMMAND "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_enable_install_rules_for_add_subdirectory_case.patch"
-"${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/boost_cmake_give_all_boost_deps_please.patch"
+        PATCH_COMMAND ${PATCH_COMMAND_FOR_CPM}
+    OPTIONS "BOOST_ENABLE_CMAKE ON"
   )
+  
   set(IS_BOOST_LOCAL OFF)
 endif()
 
