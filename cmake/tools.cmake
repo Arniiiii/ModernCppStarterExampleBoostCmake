@@ -6,7 +6,7 @@ if(NOT PROJECT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   return()
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/CPM.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/getCPM.cmake)
 
 # enables sanitizers support using the the `USE_SANITIZER` flag available values are: Address,
 # Memory, MemoryWithOrigins, Undefined, Thread, Leak, 'Address;Undefined'
