@@ -9,6 +9,11 @@ project(
   LANGUAGES CXX
 )
 
+set(FETCHCONTENT_QUIET
+    OFF
+    CACHE BOOL "Make downloading of packages quiet"
+)
+
 # ---- Include guards ----
 
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)

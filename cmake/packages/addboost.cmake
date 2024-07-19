@@ -45,10 +45,14 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
   set(BOOST_URL
       "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}-cmake.tar.xz"
   )
+  set(boost_is_old FALSE)
   if(${TRY_BOOST_VERSION} STRLESS "1.85.0")
     set(BOOST_URL
-        "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
+        "https://github.com/boostorg/boost/releases/download/boohttps://annas-archive.org/search?index=&page=1&q=c%2B%2B+concurrency+in+action&sort=st-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
     )
+  endif()
+  if(${TRY_BOOST_VERSION} STRLESS "1.81.0.beta1")
+    set(boost_is_old TRUE)
   endif()
 
   set(patches_for_boost "")
@@ -70,29 +74,26 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
     endforeach()
   endif()
 
-  if(patches_for_boost)
-    find_package(Patch REQUIRED)
-    set(PATCH_COMMAND_ARGS "-rnN")
-    set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
-    set(PATCH_COMMAND_FOR_CPM "")
-    foreach(patch_filename IN LISTS patches_for_boost)
-      list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
-      list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
-      list(APPEND PATCH_COMMAND_FOR_CPM &&)
-    endforeach()
-    list(POP_BACK PATCH_COMMAND_FOR_CPM)
-    message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
+  if(patches_for_boost AND NOT boost_is_old)
     CPMAddPackage(
       NAME Boost
-      URL ${BOOST_URL} PATCH_COMMAND ${PATCH_COMMAND_FOR_CPM}
+      URL ${BOOST_URL} PATCHES ${patches_for_boost}
       OPTIONS "BOOST_ENABLE_CMAKE ON" "BOOST_SKIP_INSTALL_RULES OFF"
     )
-  else()
+  elseif(NOT boost_is_old)
     CPMAddPackage(
       NAME Boost
       URL ${BOOST_URL}
       OPTIONS "BOOST_SKIP_INSTALL_RULES OFF"
     )
+  else()
+    CPMAddPackage(
+      NAME Boost
+      GIT_REPOSITORY "https://github.com/boostorg/boost"
+      GIT_TAG "boost-${TRY_BOOST_VERSION}" PATCHES ${patches_for_boost}
+      OPTIONS "BOOST_ENABLE_CMAKE ON" "BOOST_SKIP_INSTALL_RULES OFF"
+    )
+
   endif()
 
   set(IS_BOOST_LOCAL OFF)
