@@ -3,3 +3,7 @@
 /cpm_modules
 .DS_Store
 /.cache
+build/
+cmake_build*/
+.cache/
+compile_commands.json

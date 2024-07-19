@@ -2,8 +2,8 @@
 #
 # SPDX-FileCopyrightText: Copyright (c) 2019-2023 Lars Melchior and contributors
 
-# set(CPM_DOWNLOAD_VERSION 0.38.7)
-# set(CPM_HASH_SUM "83e5eb71b2bbb8b1f2ad38f1950287a057624e385c238f6087f94cdfc44af9c5")
+set(CPM_DOWNLOAD_VERSION 0.40.0)
+set(CPM_HASH_SUM "7b354f3a5976c4626c876850c93944e52c83ec59a159ae5de5be7983f0e17a2a")
 
 if(CPM_SOURCE_CACHE)
   set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
@@ -16,12 +16,9 @@ endif()
 # Expand relative path. This is important if the provided path contains a tilde (~)
 get_filename_component(CPM_DOWNLOAD_LOCATION ${CPM_DOWNLOAD_LOCATION} ABSOLUTE)
 
-# file(DOWNLOAD
-#      https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
-#      ${CPM_DOWNLOAD_LOCATION} EXPECTED_HASH SHA256=${CPM_HASH_SUM}
-# )
-
-file(DOWNLOAD https://raw.githubusercontent.com/ScottBailey/CPM.cmake/keyword_PATCHES/cmake/CPM.cmake ${CPM_DOWNLOAD_LOCATION})
-
+file(DOWNLOAD
+     https://github.com/cpm-cmake/CPM.cmake/releases/download/v${CPM_DOWNLOAD_VERSION}/CPM.cmake
+     ${CPM_DOWNLOAD_LOCATION} EXPECTED_HASH SHA256=${CPM_HASH_SUM}
+)
 
 include(${CPM_DOWNLOAD_LOCATION})

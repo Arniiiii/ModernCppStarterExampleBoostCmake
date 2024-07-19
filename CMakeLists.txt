@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.14...3.22)
 # Note: update this to your new project's name and version
 project(
   Greeter
-  VERSION 1.1
+  VERSION 1.2
   LANGUAGES CXX
 )
 
@@ -23,8 +23,7 @@ endif()
 
 include(cmake/getCPM.cmake)
 
-# # PackageProject.cmake will be used to make our target installable
-# find_package(Patch REQUIRED)
+# # PackageProject.cmake will be used to make our target installable find_package(Patch REQUIRED)
 #
 # set(PATCH_COMMAND_ARGS "-rnN")
 #
@@ -35,23 +34,20 @@ message(DEBUG "patches_for_package_project ${patches_for_package_project}")
 
 # set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
 #
-# set(PATCH_COMMAND_FOR_CPM "")
-# foreach(patch_filename IN LISTS patches_for_package_project)
-#   list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
-#   list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
-#   list(APPEND PATCH_COMMAND_FOR_CPM &&)
-# endforeach()
-# list(POP_BACK PATCH_COMMAND_FOR_CPM)
+# set(PATCH_COMMAND_FOR_CPM "") foreach(patch_filename IN LISTS patches_for_package_project)
+# list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE}) list(APPEND PATCH_COMMAND_FOR_CPM
+# ${patch_filename}) list(APPEND PATCH_COMMAND_FOR_CPM &&) endforeach() list(POP_BACK
+# PATCH_COMMAND_FOR_CPM)
 #
 # message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
 CPMAddPackage(
   NAME PackageProject
   VERSION 1.11.2
   GIT_REPOSITORY "https://github.com/TheLartians/PackageProject.cmake.git"
-  PATCHES ${patches_for_package_project}
+                 PATCHES ${patches_for_package_project}
 )
 
-set(TRY_BOOST_VERSION "1.84.0")
+set(TRY_BOOST_VERSION "1.85.0")
 set(BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "thread")
 set(BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "asio")
 
@@ -93,20 +89,17 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
 
   # set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
   #
-  # set(PATCH_COMMAND_FOR_CPM "")
-  # foreach(patch_filename IN LISTS patches_for_boost)
-  #   list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
-  #   list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
-  #   list(APPEND PATCH_COMMAND_FOR_CPM &&)
-  # endforeach()
-  # list(POP_BACK PATCH_COMMAND_FOR_CPM)
+  # set(PATCH_COMMAND_FOR_CPM "") foreach(patch_filename IN LISTS patches_for_boost) list(APPEND
+  # PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE}) list(APPEND PATCH_COMMAND_FOR_CPM
+  # ${patch_filename}) list(APPEND PATCH_COMMAND_FOR_CPM &&) endforeach() list(POP_BACK
+  # PATCH_COMMAND_FOR_CPM)
   #
   # message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
 
   CPMAddPackage(
     NAME Boost
     URL "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
-    PATCHES ${patches_for_boost}
+        PATCHES ${patches_for_boost}
     OPTIONS "BOOST_ENABLE_CMAKE ON"
   )
 
@@ -130,7 +123,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17)
 # being a cross-platform target, we enforce standards conformance on MSVC
 target_compile_options(${PROJECT_NAME} PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive->")
 
-# Link dependencies 
+# Link dependencies
 if(${IS_BOOST_LOCAL})
   target_link_libraries(${PROJECT_NAME} PUBLIC Boost::boost)
 else()
@@ -167,5 +160,5 @@ packageProject(
   INCLUDE_DESTINATION include/${PROJECT_NAME}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}"
   COMPATIBILITY "AnyNewerVersion" DISABLE_VERSION_SUFFIX ON
-  DEPENDENCIES "Boost 1.84.0"
+  DEPENDENCIES "Boost 1.85.0"
 )
