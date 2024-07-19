@@ -21,33 +21,34 @@ endif()
 # ---- Add dependencies via CPM ----
 # see https://github.com/TheLartians/CPM.cmake for more info
 
-include(cmake/CPM.cmake)
+include(cmake/getCPM.cmake)
 
-# PackageProject.cmake will be used to make our target installable
-find_package(Patch REQUIRED)
-
-set(PATCH_COMMAND_ARGS "-rnN")
-
-file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
+# # PackageProject.cmake will be used to make our target installable
+# find_package(Patch REQUIRED)
+#
+# set(PATCH_COMMAND_ARGS "-rnN")
+#
+file(GLOB_RECURSE patches_for_package_project CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/patches/packageProject/*.patch"
 )
+message(DEBUG "patches_for_package_project ${patches_for_package_project}")
 
-set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
-
-set(PATCH_COMMAND_FOR_CPM "")
-foreach(patch_filename IN LISTS patches_for_boost)
-  list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
-  list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
-  list(APPEND PATCH_COMMAND_FOR_CPM &&)
-endforeach()
-list(POP_BACK PATCH_COMMAND_FOR_CPM)
-
-message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
+# set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
+#
+# set(PATCH_COMMAND_FOR_CPM "")
+# foreach(patch_filename IN LISTS patches_for_package_project)
+#   list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
+#   list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
+#   list(APPEND PATCH_COMMAND_FOR_CPM &&)
+# endforeach()
+# list(POP_BACK PATCH_COMMAND_FOR_CPM)
+#
+# message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
 CPMAddPackage(
   NAME PackageProject
   VERSION 1.11.2
-  GIT_REPOSITORY "https://github.com/TheLartians/PackageProject.cmake.git" PATCH_COMMAND
-                                                                           ${PATCH_COMMAND_FOR_CPM}
+  GIT_REPOSITORY "https://github.com/TheLartians/PackageProject.cmake.git"
+  PATCHES ${patches_for_package_project}
 )
 
 set(TRY_BOOST_VERSION "1.84.0")
@@ -81,30 +82,31 @@ if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
   set(BOOST_INCLUDE_LIBRARIES
       "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}"
   )
-  find_package(Patch REQUIRED)
-
-  set(PATCH_COMMAND_ARGS "-rnN")
-
+  # find_package(Patch REQUIRED)
+  #
+  # set(PATCH_COMMAND_ARGS "-rnN")
+  #
   file(GLOB_RECURSE patches_for_boost CONFIGURE_DEPENDS
        "${CMAKE_CURRENT_SOURCE_DIR}/patches/boost/*.patch"
   )
+  message(DEBUG "patches_for_boost ${patches_for_boost}")
 
-  set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
-
-  set(PATCH_COMMAND_FOR_CPM "")
-  foreach(patch_filename IN LISTS patches_for_boost)
-    list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
-    list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
-    list(APPEND PATCH_COMMAND_FOR_CPM &&)
-  endforeach()
-  list(POP_BACK PATCH_COMMAND_FOR_CPM)
-
-  message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
+  # set(PATCH_COMMAND_FOR_CPM_BASE "${Patch_EXECUTABLE}" ${PATCH_COMMAND_ARGS} -p1 <)
+  #
+  # set(PATCH_COMMAND_FOR_CPM "")
+  # foreach(patch_filename IN LISTS patches_for_boost)
+  #   list(APPEND PATCH_COMMAND_FOR_CPM ${PATCH_COMMAND_FOR_CPM_BASE})
+  #   list(APPEND PATCH_COMMAND_FOR_CPM ${patch_filename})
+  #   list(APPEND PATCH_COMMAND_FOR_CPM &&)
+  # endforeach()
+  # list(POP_BACK PATCH_COMMAND_FOR_CPM)
+  #
+  # message(DEBUG "Patch command: ${PATCH_COMMAND_FOR_CPM}")
 
   CPMAddPackage(
     NAME Boost
     URL "https://github.com/boostorg/boost/releases/download/boost-${TRY_BOOST_VERSION}/boost-${TRY_BOOST_VERSION}.tar.xz"
-        PATCH_COMMAND ${PATCH_COMMAND_FOR_CPM}
+    PATCHES ${patches_for_boost}
     OPTIONS "BOOST_ENABLE_CMAKE ON"
   )
 
