@@ -28,17 +28,17 @@ jobs:
 
       - name: build and install library
         run: |
-          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release
-          sudo cmake --build build --target install
+          cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release --log-level=DEBUG
+          sudo cmake --build build --target install --verbose -j4
           rm -rf build
 
       - name: configure
-        run: cmake -Stest -Bbuild -DTEST_INSTALLED_VERSION=1 -DCPM_DOWNLOAD_ALL=1 -DCPM_SOURCE_CACHE=~/.cache/cpm
+        run: cmake -Stest -Bbuild -DTEST_INSTALLED_VERSION=1 -DCPM_DOWNLOAD_ALL=1 -DCPM_SOURCE_CACHE=~/.cache/cpm --log-level=DEBUG
 
       - name: build
-        run: cmake --build build --config Debug -j4
+        run: cmake --build build --config Debug -j4 --verbose
 
       - name: test
         run: |
           cd build
-          ctest --build-config Debug
+          ctest --build-config Debug -j4

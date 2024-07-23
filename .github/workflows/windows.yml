@@ -30,12 +30,12 @@ jobs:
         run: git config --system core.longpaths true  # https://github.com/orgs/community/discussions/26952 
       
       - name: configure
-        run: cmake -Stest -Bbuild
+        run: cmake -Stest -Bbuild --log-level=DEBUG
 
       - name: build
-        run: cmake --build build --config Debug -j4
+        run: cmake --build build --config Debug -j4 --verbose
 
       - name: test
         run: |
           cd build
-          ctest --build-config Debug
+          ctest --build-config Debug -j4
