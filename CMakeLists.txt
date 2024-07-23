@@ -79,6 +79,10 @@ target_include_directories(
 # ---- Create an installable target ----
 # this allows users to install and find the library via `find_package()`.
 
+# the location where the project's version header will be placed should match the project's regular
+# header paths
+string(TOLOWER ${PROJECT_NAME}/version.h VERSION_HEADER_LOCATION)
+
 set_property(TARGET ${PROJECT_NAME} PROPERTY VERSION ${PROJECT_VERSION})
 set_property(TARGET ${PROJECT_NAME} PROPERTY SOVERSION 1)
 
@@ -125,7 +129,7 @@ else()
     BINARY_DIR ${PROJECT_BINARY_DIR}
     INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include
     INCLUDE_DESTINATION include/${PROJECT_NAME}
-    VERSION_HEADER "${PROJECT_NAME}/version.h" EXPORT_HEADER "${PROJECT_NAME}/export.h"
+    VERSION_HEADER "${VERSION_HEADER_LOCATION}" EXPORT_HEADER "${PROJECT_NAME}/export.h"
     COMPATIBILITY "AnyNewerVersion" DISABLE_VERSION_SUFFIX ON
     DEPENDENCIES "${BOOST_DOWNLOADED_INSTALL_TARGETS}"
   )
