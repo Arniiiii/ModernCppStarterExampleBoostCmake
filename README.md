@@ -1,15 +1,29 @@
-[![Actions Status](https://github.com/TheLartians/ModernCppStarter/workflows/MacOS/badge.svg)](https://github.com/TheLartians/ModernCppStarter/actions)
-[![Actions Status](https://github.com/TheLartians/ModernCppStarter/workflows/Windows/badge.svg)](https://github.com/TheLartians/ModernCppStarter/actions)
-[![Actions Status](https://github.com/TheLartians/ModernCppStarter/workflows/Ubuntu/badge.svg)](https://github.com/TheLartians/ModernCppStarter/actions)
-[![Actions Status](https://github.com/TheLartians/ModernCppStarter/workflows/Style/badge.svg)](https://github.com/TheLartians/ModernCppStarter/actions)
-[![Actions Status](https://github.com/TheLartians/ModernCppStarter/workflows/Install/badge.svg)](https://github.com/TheLartians/ModernCppStarter/actions)
-[![codecov](https://codecov.io/gh/TheLartians/ModernCppStarter/branch/master/graph/badge.svg)](https://codecov.io/gh/TheLartians/ModernCppStarter)
+
+[![Actions Status](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/workflows/MacOS/badge.svg)](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/actions)
+[![Actions Status](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/workflows/Windows/badge.svg)](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/actions)
+[![Actions Status](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/workflows/Ubuntu/badge.svg)](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/actions)
+[![Actions Status](https:github.com/Arniiiii/ModernCppStarterExampleBoostCmake/workflows/Style/badge.svg)](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/actions)
+<!-- 
+[![Actions Status](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmake/workflows/Install/badge.svg)](https://github.com/Arniiiii/ModernCppStarterExampleBoostCmaker/actions)
+ [![codecov](https://codecov.io/gh/Arniiiii/ModernCppStarterExampleBoostCmake/branch/master/graph/badge.svg)](https://codecov.io/gh/Arniiiii/ModernCppStarterExampleBoostCmake)
+-->
+
+# ModernCppStarterExampleBoostCmake
+
+So, It's example of how to use boost from CMake, even if there's no boost on local system. It works perfectly.   
+
+You can check the main part of finding or downloading and adding boost at `cmake/packages/addboost.cmake` and how to use it and how add relevant targets from installed or downloaded boost.  
+
+Script tested for Boost from 1.79.0 to 1.85.0 .
+
+## From template:
+
 
 <p align="center">
   <img src="https://repository-images.githubusercontent.com/254842585/4dfa7580-7ffb-11ea-99d0-46b8fe2f4170" height="175" width="auto" />
 </p>
 
-# ModernCppStarter
+## ModernCppStarter
 
 Setting up a new C++ project usually requires a significant amount of preparation and boilerplate code, even more so for modern C++ projects with tests, executables and continuous integration.
 This template is the result of learnings from many previous projects and should help reduce the work required to setup up a modern C++ project.

@@ -6,4 +6,6 @@
 build/
 cmake_build*/
 .cache/
+install_dir/
 compile_commands.json
+
