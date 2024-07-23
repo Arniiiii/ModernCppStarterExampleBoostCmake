@@ -25,10 +25,9 @@ jobs:
         with:
           path: "**/cpm_modules"
           key: ${{ github.workflow }}-cpm-modules-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
-
-# https://github.com/orgs/community/discussions/26952  
+      
       - name: Support longpaths
-      - run: git config --system core.longpaths true
+      - run: git config --system core.longpaths true  # https://github.com/orgs/community/discussions/26952 
       
       - name: configure
         run: cmake -Stest -Bbuild
