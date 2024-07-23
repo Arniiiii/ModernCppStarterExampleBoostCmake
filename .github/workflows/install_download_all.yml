@@ -1,4 +1,4 @@
-name: Install
+name: Install_CPM_DOWNLOAD_ALL
 
 on:
   push:
