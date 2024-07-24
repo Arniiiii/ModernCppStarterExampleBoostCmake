@@ -22,14 +22,14 @@ function(add_boost_and_link TRY_BOOST_VERSION BOOST_HEADER_ONLY_COMPONENTS_THAT_
 )
   set(IS_BOOST_LOCAL OFF)
   if(${CPM_LOCAL_PACKAGES_ONLY})
-    message(STATUS "Trying to find Boost...")
+    message(STATUS "Trying to find Boost with version at least ${TRY_BOOST_VERSION}")
     find_package(
       Boost ${TRY_BOOST_VERSION} REQUIRED
       COMPONENTS ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}
     )
     set(IS_BOOST_LOCAL ON)
   elseif(${CPM_USE_LOCAL_PACKAGES} OR NOT ${CPM_DOWNLOAD_ALL})
-    message(STATUS "Trying to use local Boost...")
+    message(STATUS "Trying to use local Boost with version at least ${TRY_BOOST_VERSION}")
     find_package(
       Boost ${TRY_BOOST_VERSION} COMPONENTS ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}
     )
@@ -40,7 +40,7 @@ function(add_boost_and_link TRY_BOOST_VERSION BOOST_HEADER_ONLY_COMPONENTS_THAT_
   endif()
 
   if(NOT (${BOOST_FOUND}) OR (NOT DEFINED BOOST_FOUND))
-    message(STATUS "Trying to download Boost...")
+    message(STATUS "Trying to download Boost ${TRY_BOOST_VERSION}")
 
     set(BOOST_INCLUDE_LIBRARIES
         "${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED};${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}"
@@ -79,18 +79,30 @@ function(add_boost_and_link TRY_BOOST_VERSION BOOST_HEADER_ONLY_COMPONENTS_THAT_
     endif()
 
     if(patches_for_boost AND NOT boost_is_old)
+      message(
+        STATUS
+          "Downloading boost release from github in form of a .tar.xz tarball... If there's nothing for too long, set at CMake's configuring -DFETCHCONTENT_QUIET=OFF to see download progress"
+      )
       CPMAddPackage(
         NAME Boost
         URL ${BOOST_URL} PATCHES ${patches_for_boost}
         OPTIONS "BOOST_ENABLE_CMAKE ON" "BOOST_SKIP_INSTALL_RULES OFF"
       )
     elseif(NOT boost_is_old)
+      message(
+        STATUS
+          "Downloading boost release from github in form of a .tar.xz tarball... If there's nothing for too long, set at CMake's configuring -DFETCHCONTENT_QUIET=OFF to see download progress"
+      )
       CPMAddPackage(
         NAME Boost
         URL ${BOOST_URL}
         OPTIONS "BOOST_SKIP_INSTALL_RULES OFF"
       )
     else()
+      message(
+        STATUS
+          "Since there's no release at github for such old version, cloning boost from github with GIT_TAG \"boost_${TRY_BOOST_VERSION}\"... If there's nothing for too long, set at CMake's configuring -DFETCHCONTENT_QUIET=OFF to see download progress"
+      )
       CPMAddPackage(
         NAME Boost
         GIT_REPOSITORY "https://github.com/boostorg/boost"
@@ -146,9 +158,12 @@ function(add_boost_and_link TRY_BOOST_VERSION BOOST_HEADER_ONLY_COMPONENTS_THAT_
     )
     set(OUR_BOOST_INSTALL_TARGETS ${BOOST_DOWNLOADED_INSTALL_TARGETS})
   endif()
-  
+
   message(DEBUG "OUR_BOOST_INSTALL_TARGETS: ${OUR_BOOST_INSTALL_TARGETS}")
 
-  set(${return_var_name_boost_install_targets} "${OUR_BOOST_INSTALL_TARGETS}" PARENT_SCOPE)
+  set(${return_var_name_boost_install_targets}
+      "${OUR_BOOST_INSTALL_TARGETS}"
+      PARENT_SCOPE
+  )
 
 endfunction()
