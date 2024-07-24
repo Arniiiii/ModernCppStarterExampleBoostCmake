@@ -9,6 +9,15 @@ project(
   LANGUAGES CXX
 )
 
+option(BUILD_SHARED_LIBS "yes/no" YES)
+
+if(${BUILD_SHARED_LIBS})
+  # https://stackoverflow.com/questions/33062728/cmake-link-shared-library-on-windows
+  if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+  endif()
+endif()
+
 set(FETCHCONTENT_QUIET
     OFF
     CACHE BOOL "Make downloading of packages quiet"
@@ -33,8 +42,6 @@ include(cmake/packages/packageproject.cmake)
 set(TRY_BOOST_VERSION "1.85.0")
 set(BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "thread")
 set(BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "asio")
-
-option(BUILD_SHARED_LIBS "yes/no" YES)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/packages/addboost.cmake)
 
