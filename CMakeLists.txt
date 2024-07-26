@@ -67,9 +67,8 @@ set(BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED "asio")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/packages/addboost.cmake)
 
-add_boost(
-  ${TRY_BOOST_VERSION} ${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}
-  ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED} ${PROJECT_NAME} boost_install_targets
+add_boost(${TRY_BOOST_VERSION} ${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}
+          ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED} ${PROJECT_NAME} boost_install_targets
 )
 
 message(DEBUG "boost_install_targets: ${boost_install_targets}")
