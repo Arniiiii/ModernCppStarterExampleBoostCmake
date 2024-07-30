@@ -71,8 +71,6 @@ add_boost(${TRY_BOOST_VERSION} ${BOOST_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED}
           ${BOOST_NOT_HEADER_ONLY_COMPONENTS_THAT_YOU_NEED} ${PROJECT_NAME} boost_install_targets
 )
 
-message(DEBUG "boost_install_targets: ${boost_install_targets}")
-
 # ---- Create an installable target ----
 # this allows users to install and find the library via `find_package()`.
 
@@ -93,5 +91,7 @@ packageProject(
   INCLUDE_DESTINATION include/${PROJECT_NAME}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}" EXPORT_HEADER "${EXPORT_HEADER_LOCATION}"
   COMPATIBILITY "AnyNewerVersion" DISABLE_VERSION_SUFFIX ON
-  DEPENDENCIES "${boost_install_targets}"
+  DEPENDENCIES "${ADDBOOSTCMAKE_PACKAGEPROJECT_INSTALL_TARGETS}"
 )
+
+message(DEBUG "Boost_ADDED: ${Boost_ADDED}")

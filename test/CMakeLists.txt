@@ -14,8 +14,12 @@ include(../cmake/tools.cmake)
 # ---- Dependencies ----
 
 include(../cmake/getCPM.cmake)
-
-CPMAddPackage("gh:doctest/doctest@2.4.9")
+set(CPM_DOWNLOAD_ALL ON)
+CPMAddPackage(
+  NAME doctest
+  GITHUB_REPOSITORY "doctest/doctest"
+  VERSION "2.4.9"
+)
 CPMAddPackage("gh:TheLartians/Format.cmake@1.7.3")
 
 if(TEST_INSTALLED_VERSION)
@@ -49,7 +53,11 @@ enable_testing()
 # testing frameworks add the tests target instead: add_test(NAME ${PROJECT_NAME} COMMAND
 # ${PROJECT_NAME})
 
-include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+if(NOT DEFINED doctest_ADDED OR "${doctest_ADDED}" STREQUAL "")
+  include("/usr/lib64/cmake/doctest/doctest.cmake")
+else()
+  include(${doctest_SOURCE_DIR}/scripts/cmake/doctest.cmake)
+endif()
 doctest_discover_tests(${PROJECT_NAME})
 
 # ---- code coverage ----

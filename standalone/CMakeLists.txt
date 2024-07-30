@@ -11,6 +11,7 @@ include(../cmake/tools.cmake)
 include(../cmake/getCPM.cmake)
 
 CPMAddPackage(
+  NAME cxxopts
   GITHUB_REPOSITORY jarro2783/cxxopts
   VERSION 3.0.0
   OPTIONS "CXXOPTS_BUILD_EXAMPLES NO" "CXXOPTS_BUILD_TESTS NO" "CXXOPTS_ENABLE_INSTALL YES"
@@ -26,7 +27,8 @@ add_executable(${PROJECT_NAME} ${sources})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 20 OUTPUT_NAME "Greeter")
 
-target_link_libraries(${PROJECT_NAME} Greeter::Greeter cxxopts)
+target_link_libraries(${PROJECT_NAME} PRIVATE Greeter::Greeter)
+target_link_libraries(${PROJECT_NAME} INTERFACE cxxopts)
 
 # install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 install(
